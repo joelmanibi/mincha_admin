@@ -23,7 +23,7 @@ export const authService = {
     };
     Cookies.set(USER_DATA_COOKIE_NAME, JSON.stringify(userData), {
       expires: oneHourFromNow,
-      secure: process.env.NODE_ENV === 'production',
+   //   secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict'
     });
   },
