@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
@@ -10,9 +10,10 @@ import type { PropertyPhoto } from "@/lib/types/property.types"
 
 interface PropertyPhotoGalleryProps {
   photos: PropertyPhoto[]
+  isMobileView: boolean
 }
 
-export function PropertyPhotoGallery({ photos }: PropertyPhotoGalleryProps) {
+export function PropertyPhotoGallery({ photos, isMobileView }: PropertyPhotoGalleryProps) {
   const [selectedPhoto, setSelectedPhoto] = useState<PropertyPhoto | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -20,7 +21,6 @@ export function PropertyPhotoGallery({ photos }: PropertyPhotoGalleryProps) {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1))
   }
 
-  
   const handleNext = () => {
     setCurrentIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0))
   }
@@ -42,7 +42,7 @@ export function PropertyPhotoGallery({ photos }: PropertyPhotoGalleryProps) {
             }}
           >
             <img
-              src={getFullImageUrl(photo.propertyPhotoName)}
+              src={getFullImageUrl(photo.propertyPhotoName) || "/placeholder.svg"}
               alt={`Photo ${index + 1}`}
               className="object-cover w-full h-full transition-transform group-hover:scale-110"
             />
@@ -51,11 +51,11 @@ export function PropertyPhotoGallery({ photos }: PropertyPhotoGalleryProps) {
       </div>
 
       <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
-        <DialogContent className="max-w-4xl p-0 bg-transparent border-0">
-          <div className="relative aspect-[4/3] bg-black">
+        <DialogContent className="max-w-[95vw] md:max-w-4xl p-0 bg-transparent border-0">
+          <div className="relative aspect-square md:aspect-[4/3] bg-black">
             {selectedPhoto && (
               <img
-                src={getFullImageUrl(photos[currentIndex].propertyPhotoName)}
+                src={getFullImageUrl(photos[currentIndex].propertyPhotoName) || "/placeholder.svg"}
                 alt={`Photo ${currentIndex + 1}`}
                 className="w-full h-full object-contain"
               />

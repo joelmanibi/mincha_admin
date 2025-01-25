@@ -63,14 +63,15 @@ export function PropertyDeleteDialog({ property, open, onOpenChange, onSuccess }
           </AlertDialogTitle>
           <AlertDialogDescription>
             Êtes-vous sûr de vouloir supprimer cette propriété ? Cette action est irréversible.
-            <div className="mt-2 rounded-lg border p-3">
-              <div className="font-medium">Propriété #{property.propertyId}</div>
-              <div className="text-sm text-muted-foreground">
-                {property.propertytype.propertyTypeName} - {property.ville?.villeName}
-              </div>
-              <div className="text-sm text-muted-foreground">Propriétaire: {property.account?.accounTitle}</div>
-            </div>
           </AlertDialogDescription>
+          {/* Move the property details outside of the description */}
+          <div className="mt-2 rounded-lg border p-3">
+            <div className="font-medium">Propriété #{property.propertyId}</div>
+            <div className="text-sm text-muted-foreground">
+              {property.propertytype.propertyTypeName} - {property.ville?.villeName}
+            </div>
+            <div className="text-sm text-muted-foreground">Propriétaire: {property.account?.accounTitle}</div>
+          </div>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Annuler</AlertDialogCancel>

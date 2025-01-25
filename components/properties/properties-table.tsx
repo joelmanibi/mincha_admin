@@ -68,6 +68,9 @@ export function PropertiesTable() {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [sortColumn, setSortColumn] = useState<string | null>(null)
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
+  const [isMobileView, setIsMobileView] = useState(false)
 
   const refreshProperties = async () => {
     try {
@@ -85,8 +88,26 @@ export function PropertiesTable() {
     }
   }
 
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+    } else {
+      setSortColumn(column)
+      setSortDirection("asc")
+    }
+  }
+
   React.useEffect(() => {
     refreshProperties()
+  }, [])
+
+  React.useEffect(() => {
+    const checkMobileView = () => {
+      setIsMobileView(window.innerWidth < 768) // Adjust this breakpoint as needed
+    }
+    checkMobileView()
+    window.addEventListener("resize", checkMobileView)
+    return () => window.removeEventListener("resize", checkMobileView)
   }, [])
 
   const filteredProperties = properties.filter((property) => {
@@ -104,16 +125,35 @@ export function PropertiesTable() {
     return matchesSearch && matchesType && matchesApproval && matchesPool && matchesMinPrice && matchesMaxPrice
   })
 
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage)
+  const sortedProperties = [...filteredProperties].sort((a, b) => {
+    if (!sortColumn) return 0
+
+    // Handle nested properties
+    const getValue = (obj: any, path: string) => {
+      return path.split(".").reduce((acc, part) => acc?.[part] ?? "", obj)
+    }
+
+    const valueA = getValue(a, sortColumn)
+    const valueB = getValue(b, sortColumn)
+
+    if (valueA < valueB) {
+      return sortDirection === "asc" ? -1 : 1
+    }
+    if (valueA > valueB) {
+      return sortDirection === "asc" ? 1 : -1
+    }
+    return 0
+  })
+
+  const totalPages = Math.ceil(sortedProperties.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const paginatedProperties = filteredProperties.slice(startIndex, endIndex)
+  const paginatedProperties = sortedProperties.slice(startIndex, endIndex)
 
   // Reset to first page when filters change
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, filters, itemsPerPage])
+  }, [searchQuery, filters, itemsPerPage, sortColumn, sortDirection])
 
   const clearFilters = () => {
     setFilters({
@@ -201,20 +241,22 @@ export function PropertiesTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-1 items-center space-x-2 flex-wrap gap-y-2">
-          <div className="relative w-64">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher une propriété..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8"
-            />
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="w-full md:w-64">
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher une propriété..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 w-full"
+              />
+            </div>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full md:w-auto">
                 Type de bien <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -237,7 +279,7 @@ export function PropertiesTable() {
           </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full md:w-auto">
                 Statut <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -258,7 +300,7 @@ export function PropertiesTable() {
           </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full md:w-auto">
                 Caractéristiques <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -282,35 +324,102 @@ export function PropertiesTable() {
             filters.hasPool !== null ||
             filters.minPrice !== null ||
             filters.maxPrice !== null) && (
-            <Button variant="ghost" onClick={clearFilters} className="text-red-500 hover:text-red-600">
+            <Button variant="ghost" onClick={clearFilters} className="text-red-500 hover:text-red-600 w-full md:w-auto">
               Réinitialiser les filtres
             </Button>
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={exportToExcel} className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportToExcel}
+            className="flex items-center gap-2 w-full md:w-auto"
+          >
             <Download className="h-4 w-4" />
             Exporter
           </Button>
-          <Button className="flex items-center gap-2">
+          <Button className="flex items-center gap-2 w-full md:w-auto">
             <Plus className="h-4 w-4" />
             Ajouter une propriété
           </Button>
         </div>
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Propriété</TableHead>
-              <TableHead>Propriétaire</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Localisation</TableHead>
-              <TableHead>Prix</TableHead>
-              <TableHead>Surface</TableHead>
-              <TableHead>Caractéristiques</TableHead>
-              <TableHead>Statut</TableHead>
-              <TableHead>Date d'ajout</TableHead>
+              <TableHead onClick={() => handleSort("propertyId")} className="cursor-pointer">
+                Propriété
+                {sortColumn === "propertyId" && (
+                  <span className={`ml-2 text-xs ${sortDirection === "asc" ? "text-green-500" : "text-red-500"}`}>
+                    {sortDirection === "asc" ? "▲" : "▼"}
+                  </span>
+                )}
+              </TableHead>
+              {!isMobileView && (
+                <>
+                  <TableHead onClick={() => handleSort("account.accounTitle")} className="cursor-pointer">
+                    Propriétaire
+                    {sortColumn === "account.accounTitle" && (
+                      <span className={`ml-2 text-xs ${sortDirection === "asc" ? "text-green-500" : "text-red-500"}`}>
+                        {sortDirection === "asc" ? "▲" : "▼"}
+                      </span>
+                    )}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("propertytype.propertyTypeName")} className="cursor-pointer">
+                    Type
+                    {sortColumn === "propertytype.propertyTypeName" && (
+                      <span className={`ml-2 text-xs ${sortDirection === "asc" ? "text-green-500" : "text-red-500"}`}>
+                        {sortDirection === "asc" ? "▲" : "▼"}
+                      </span>
+                    )}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("ville.villeName")} className="cursor-pointer">
+                    Localisation
+                    {sortColumn === "ville.villeName" && (
+                      <span className={`ml-2 text-xs ${sortDirection === "asc" ? "text-green-500" : "text-red-500"}`}>
+                        {sortDirection === "asc" ? "▲" : "▼"}
+                      </span>
+                    )}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("propertyPrice")} className="cursor-pointer">
+                    Prix
+                    {sortColumn === "propertyPrice" && (
+                      <span className={`ml-2 text-xs ${sortDirection === "asc" ? "text-green-500" : "text-red-500"}`}>
+                        {sortDirection === "asc" ? "▲" : "▼"}
+                      </span>
+                    )}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("propertyArea")} className="cursor-pointer">
+                    Surface
+                    {sortColumn === "propertyArea" && (
+                      <span className={`ml-2 text-xs ${sortDirection === "asc" ? "text-green-500" : "text-red-500"}`}>
+                        {sortDirection === "asc" ? "▲" : "▼"}
+                      </span>
+                    )}
+                  </TableHead>
+                  <TableHead>Caractéristiques</TableHead>
+                </>
+              )}
+              <TableHead onClick={() => handleSort("propertyApproved")} className="cursor-pointer">
+                Statut
+                {sortColumn === "propertyApproved" && (
+                  <span className={`ml-2 text-xs ${sortDirection === "asc" ? "text-green-500" : "text-red-500"}`}>
+                    {sortDirection === "asc" ? "▲" : "▼"}
+                  </span>
+                )}
+              </TableHead>
+              {!isMobileView && (
+                <TableHead onClick={() => handleSort("createdAt")} className="cursor-pointer">
+                  Date d'ajout
+                  {sortColumn === "createdAt" && (
+                    <span className={`ml-2 text-xs ${sortDirection === "asc" ? "text-green-500" : "text-red-500"}`}>
+                      {sortDirection === "asc" ? "▲" : "▼"}
+                    </span>
+                  )}
+                </TableHead>
+              )}
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -319,35 +428,38 @@ export function PropertiesTable() {
               ? Array.from({ length: itemsPerPage }).map((_, index) => (
                   <TableRow key={index}>
                     <TableCell>
-                      <div className="space-y-2">
-                        <Skeleton className="h-4 w-[250px]" />
-                        <Skeleton className="h-4 w-[200px]" />
-                      </div>
+                      <Skeleton className="h-4 w-[250px]" />
                     </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-[150px]" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-[100px]" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-[100px]" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-[100px]" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-[80px]" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-[200px]" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-[100px]" />
-                    </TableCell>
+                    {!isMobileView && (
+                      <>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[150px]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[100px]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[100px]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[100px]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[80px]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[200px]" />
+                        </TableCell>
+                      </>
+                    )}
                     <TableCell>
                       <Skeleton className="h-4 w-[100px]" />
                     </TableCell>
+                    {!isMobileView && (
+                      <TableCell>
+                        <Skeleton className="h-4 w-[100px]" />
+                      </TableCell>
+                    )}
                     <TableCell>
                       <Skeleton className="h-8 w-8 rounded-full" />
                     </TableCell>
@@ -359,45 +471,55 @@ export function PropertiesTable() {
                       <div className="space-y-1">
                         <div className="font-medium">Propriété #{property.propertyId}</div>
                         <div className="text-sm text-muted-foreground">{property.level.levelName}</div>
+                        {isMobileView && (
+                          <>
+                            <div className="text-sm">{property.propertytype.propertyTypeName}</div>
+                            <div className="text-sm">{propertyService.formatPrice(property.propertyPrice)}</div>
+                          </>
+                        )}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div className="font-medium">{property.account?.accounTitle}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {property.account?.accounttype.accountTypeName}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{property.propertytype.propertyTypeName}</TableCell>
-                    <TableCell>{property.ville?.villeName || "N/A"}</TableCell>
-                    <TableCell>{propertyService.formatPrice(property.propertyPrice)}</TableCell>
-                    <TableCell>{propertyService.formatArea(property.propertyArea)}</TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        {property.bedroom && (
-                          <div className="text-sm">
-                            {property.bedroom} chambre{property.bedroom > 1 ? "s" : ""}
+                    {!isMobileView && (
+                      <>
+                        <TableCell>
+                          <div className="space-y-1">
+                            <div className="font-medium">{property.account?.accounTitle}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {property.account?.accounttype.accountTypeName}
+                            </div>
                           </div>
-                        )}
-                        {property.bathroom && (
-                          <div className="text-sm">
-                            {property.bathroom} salle{property.bathroom > 1 ? "s" : ""} de bain
+                        </TableCell>
+                        <TableCell>{property.propertytype.propertyTypeName}</TableCell>
+                        <TableCell>{property.ville?.villeName || "N/A"}</TableCell>
+                        <TableCell>{propertyService.formatPrice(property.propertyPrice)}</TableCell>
+                        <TableCell>{propertyService.formatArea(property.propertyArea)}</TableCell>
+                        <TableCell>
+                          <div className="space-y-1">
+                            {property.bedroom && (
+                              <div className="text-sm">
+                                {property.bedroom} chambre{property.bedroom > 1 ? "s" : ""}
+                              </div>
+                            )}
+                            {property.bathroom && (
+                              <div className="text-sm">
+                                {property.bathroom} salle{property.bathroom > 1 ? "s" : ""} de bain
+                              </div>
+                            )}
+                            {property.livingRoom && (
+                              <div className="text-sm">
+                                {property.livingRoom} salon{property.livingRoom > 1 ? "s" : ""}
+                              </div>
+                            )}
+                            {property.garagePlace > 0 && (
+                              <div className="text-sm">
+                                {property.garagePlace} place{property.garagePlace > 1 ? "s" : ""} de garage
+                              </div>
+                            )}
+                            {property.piscine && <div className="text-sm">Piscine</div>}
                           </div>
-                        )}
-                        {property.livingRoom && (
-                          <div className="text-sm">
-                            {property.livingRoom} salon{property.livingRoom > 1 ? "s" : ""}
-                          </div>
-                        )}
-                        {property.garagePlace > 0 && (
-                          <div className="text-sm">
-                            {property.garagePlace} place{property.garagePlace > 1 ? "s" : ""} de garage
-                          </div>
-                        )}
-                        {property.piscine && <div className="text-sm">Piscine</div>}
-                      </div>
-                    </TableCell>
+                        </TableCell>
+                      </>
+                    )}
                     <TableCell>
                       <div
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -407,7 +529,9 @@ export function PropertiesTable() {
                         {property.propertyApproved ? "Approuvé" : "En attente"}
                       </div>
                     </TableCell>
-                    <TableCell>{format(new Date(property.createdAt), "PPP", { locale: fr })}</TableCell>
+                    {!isMobileView && (
+                      <TableCell>{format(new Date(property.createdAt), "PPP", { locale: fr })}</TableCell>
+                    )}
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -463,7 +587,7 @@ export function PropertiesTable() {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-2">
           <p className="text-sm text-muted-foreground">
             Affichage de {Math.min(startIndex + 1, filteredProperties.length)} à{" "}

@@ -1,14 +1,10 @@
 "use client"
 
-import { Building2, ChevronDown, LayoutDashboard, Users } from 'lucide-react'
+import { Building2, ChevronDown, LayoutDashboard, Users } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
 interface NavItem {
   title: string
@@ -17,11 +13,15 @@ interface NavItem {
   submenu?: NavItem[]
 }
 
+interface SidebarNavProps {
+  closeSheet?: () => void
+}
+
 const navItems: NavItem[] = [
   {
     title: "Tableau de bord",
     href: "/dashboard",
-    icon: LayoutDashboard
+    icon: LayoutDashboard,
   },
   {
     title: "Utilisateurs",
@@ -34,8 +34,8 @@ const navItems: NavItem[] = [
       {
         title: "Ajouter un utilisateur",
         href: "/users/add",
-      }
-    ]
+      },
+    ],
   },
   {
     title: "Propriétés",
@@ -48,13 +48,19 @@ const navItems: NavItem[] = [
       {
         title: "Ajouter une propriété",
         href: "/properties/add",
-      }
-    ]
-  }
+      },
+    ],
+  },
 ]
 
-export function SidebarNav() {
+export function SidebarNav({ closeSheet }: SidebarNavProps) {
   const pathname = usePathname()
+
+  const handleClick = () => {
+    if (closeSheet) {
+      closeSheet()
+    }
+  }
 
   return (
     <nav className="space-y-2">
@@ -73,9 +79,10 @@ export function SidebarNav() {
                 {item.submenu.map((subItem, subIndex) => (
                   <Link
                     key={subIndex}
-                    href={subItem.href || '#'}
+                    href={subItem.href || "#"}
+                    onClick={handleClick}
                     className={`flex items-center gap-2 px-4 py-2 text-white hover:bg-white/10 rounded-md ${
-                      pathname === subItem.href ? 'bg-white/20' : ''
+                      pathname === subItem.href ? "bg-white/20" : ""
                     }`}
                   >
                     <span className="h-1 w-1 rounded-full bg-current" />
@@ -90,9 +97,10 @@ export function SidebarNav() {
         return (
           <Link
             key={index}
-            href={item.href || '#'}
+            href={item.href || "#"}
+            onClick={handleClick}
             className={`flex items-center gap-2 px-4 py-2 text-white hover:bg-white/10 rounded-md ${
-              pathname === item.href ? 'bg-white/20' : ''
+              pathname === item.href ? "bg-white/20" : ""
             }`}
           >
             {item.icon && <item.icon className="h-5 w-5" />}

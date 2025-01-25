@@ -24,31 +24,21 @@ export function NavHeader() {
       router.push(ROUTES.AUTH)
     }
   return (
-    <header className="flex h-16 items-center gap-4 border-b bg-white px-6">
-      <Button variant="ghost" size="icon" className="lg:hidden">
+    <header className="flex h-16 items-center gap-4 border-b bg-white px-4 md:px-6">
+      <Button variant="ghost" size="icon" className="md:hidden">
         <Menu className="h-5 w-5" />
       </Button>
-      
+
       <div className="flex flex-1 items-center gap-4 md:max-w-xl">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <Input 
-            type="search" 
-            placeholder="Rechercher..." 
-            className="pl-8 bg-gray-50"
-          />
+          <Input type="search" placeholder="Rechercher..." className="pl-8 bg-gray-50 w-full" />
         </div>
       </div>
 
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="hidden lg:flex">
-          <Image
-            src="/fr-flag.png"
-            alt="Drapeau Français"
-            width={22}
-            height={22}
-            className="rounded"
-          />
+        <Button variant="ghost" size="icon" className="hidden md:flex">
+          <Image src="/fr-flag.png" alt="Drapeau Français" width={22} height={22} className="rounded" />
         </Button>
 
         <Button variant="ghost" size="icon" className="relative">
@@ -62,14 +52,9 @@ export function NavHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2">
               <div className="relative h-8 w-8">
-                <Image
-                  src="/placeholder.svg"
-                  alt="Profile"
-                  fill
-                  className="rounded-full object-cover"
-                />
+                <Image src="/placeholder.svg" alt="Profile" fill className="rounded-full object-cover" />
               </div>
-              <span className="hidden lg:inline">admin</span>
+              <span className="hidden md:inline">admin</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

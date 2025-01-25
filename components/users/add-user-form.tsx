@@ -7,22 +7,9 @@ import * as z from "zod"
 
 import { createUser } from "@/lib/actions/user.actions"
 import { Button } from "@/components/ui/button"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -62,7 +49,7 @@ export function AddUserForm() {
         title: "Succès",
         description: "L'utilisateur a été créé avec succès",
       })
-      router.push("/users/list")
+      router.push("/users")
       router.refresh()
     } else {
       toast({
@@ -180,6 +167,9 @@ export function AddUserForm() {
                       <SelectContent>
                         <SelectItem value="1">Super Admin</SelectItem>
                         <SelectItem value="2">Administrateur BO</SelectItem>
+                        <SelectItem value="3">Administrateur propriété</SelectItem>
+                        <SelectItem value="4">Locataire</SelectItem>
+                        <SelectItem value="5">Client visiteur</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -187,15 +177,11 @@ export function AddUserForm() {
                 )}
               />
             </div>
-            <div className="flex justify-end space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.back()}
-              >
+            <div className="flex flex-col md:flex-row justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => router.back()} className="w-full md:w-auto">
                 Annuler
               </Button>
-              <Button type="submit">
+              <Button type="submit" className="w-full md:w-auto">
                 Créer l'utilisateur
               </Button>
             </div>
