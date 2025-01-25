@@ -20,6 +20,7 @@ export function PropertyPhotoGallery({ photos }: PropertyPhotoGalleryProps) {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1))
   }
 
+  
   const handleNext = () => {
     setCurrentIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0))
   }
