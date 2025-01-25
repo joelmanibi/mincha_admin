@@ -4,24 +4,47 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
 import * as z from "zod"
-import { Loader2, Check, ChevronDown, Building2 } from "lucide-react"
+import { Loader2, Check, ChevronDown, Building2 } from 'lucide-react'
 import { useState, useEffect } from "react"
 
 import { API_ROUTES } from "@/lib/constants/routes"
 import { propertyService } from "@/lib/services/property.service"
 import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import type { City } from "@/lib/types/city.types"
 import type { Account } from "@/lib/types/account.types"
 import type { PropertyLevel } from "@/lib/types/property-level.types"
-import type { PropertyType } from "@/lib/types/property-type.types"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
@@ -56,24 +79,31 @@ const formSchema = z.object({
     .custom<FileList>()
     .refine((files) => files?.length === 1, "Un document est requis")
     .refine((files) => files[0]?.size <= MAX_FILE_SIZE, "La taille maximale est de 5MB")
-    .refine((files) => ACCEPTED_DOC_TYPES.includes(files[0]?.type), "Seul le format PDF est accepté"),
+    .refine(
+      (files) => ACCEPTED_DOC_TYPES.includes(files[0]?.type),
+      "Seul le format PDF est accepté"
+    ),
 })
 
-const [propertyTypes, setPropertyTypes] = useState<PropertyType[]>([])
-const [isLoadingPropertyTypes, setIsLoadingPropertyTypes] = useState(true)
-const [isLoadingCities, setIsLoadingCities] = useState(true)
-const [isLoadingAccounts, setIsLoadingAccounts] = useState(true)
-const [openCityCombobox, setOpenCityCombobox] = useState(false)
-const [openAccountCombobox, setOpenAccountCombobox] = useState(false)
-const [levels, setLevels] = useState<PropertyLevel[]>([])
-const [isLoadingLevels, setIsLoadingLevels] = useState(true)
-const [cities, setCities] = useState<City[]>([])
-const [accounts, setAccounts] = useState<Account[]>([])
+const PROPERTY_TYPES = [
+  { id: 1, name: "Appartement" },
+  { id: 2, name: "Maison" },
+  { id: 3, name: "Terrain" },
+]
+
 
 export function AddPropertyForm() {
   const router = useRouter()
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [cities, setCities] = useState<City[]>([])
+  const [accounts, setAccounts] = useState<Account[]>([])
+  const [isLoadingCities, setIsLoadingCities] = useState(true)
+  const [isLoadingAccounts, setIsLoadingAccounts] = useState(true)
+  const [openCityCombobox, setOpenCityCombobox] = useState(false)
+  const [openAccountCombobox, setOpenAccountCombobox] = useState(false)
+  const [levels, setLevels] = useState<PropertyLevel[]>([])
+  const [isLoadingLevels, setIsLoadingLevels] = useState(true)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -82,9 +112,9 @@ export function AddPropertyForm() {
       propertyLocation: "",
       propertyPrice: "",
       propertyArea: "",
-      livingRoom: "1",
-      bedroom: "1",
-      bathroom: "1",
+      livingRoom: "0",
+      bedroom: "0",
+      bathroom: "0",
       propertyLevel: "1",
       accountId: "",
     },
@@ -94,24 +124,24 @@ export function AddPropertyForm() {
     const fetchData = async () => {
       try {
         const authToken = document.cookie
-          .split("; ")
-          .find((row) => row.startsWith("micha_auth_token="))
-          ?.split("=")[1]
+          .split('; ')
+          .find(row => row.startsWith('micha_auth_token='))
+          ?.split('=')[1]
 
         if (!authToken) {
-          throw new Error("Token d'authentification manquant")
+          throw new Error('Token d\'authentification manquant')
         }
 
         const headers = {
           Authorization: `Bearer ${authToken}`,
-          Accept: "*/*",
+          Accept: '*/*',
         }
 
         // Fetch cities
         setIsLoadingCities(true)
         const citiesResponse = await fetch(API_ROUTES.GET_ALL_CITIES, { headers })
         if (!citiesResponse.ok) {
-          throw new Error("Erreur lors de la récupération des villes")
+          throw new Error('Erreur lors de la récupération des villes')
         }
         const citiesData = await citiesResponse.json()
         setCities(citiesData.city)
@@ -121,7 +151,7 @@ export function AddPropertyForm() {
         setIsLoadingAccounts(true)
         const accountsResponse = await fetch(API_ROUTES.GET_ALL_ACCOUNTS, { headers })
         if (!accountsResponse.ok) {
-          throw new Error("Erreur lors de la récupération des comptes")
+          throw new Error('Erreur lors de la récupération des comptes')
         }
         const accountsData = await accountsResponse.json()
         // Filter only approved accounts
@@ -132,23 +162,13 @@ export function AddPropertyForm() {
         setIsLoadingLevels(true)
         const levelsResponse = await fetch(API_ROUTES.GET_ALL_LEVELS, { headers })
         if (!levelsResponse.ok) {
-          throw new Error("Erreur lors de la récupération des niveaux")
+          throw new Error('Erreur lors de la récupération des niveaux')
         }
         const levelsData = await levelsResponse.json()
         setLevels(levelsData.level)
         setIsLoadingLevels(false)
-
-        // Fetch property types
-        setIsLoadingPropertyTypes(true)
-        const propertyTypesResponse = await fetch(API_ROUTES.GET_ALL_PROPERTY_TYPES, { headers })
-        if (!propertyTypesResponse.ok) {
-          throw new Error("Erreur lors de la récupération des types de propriété")
-        }
-        const propertyTypesData = await propertyTypesResponse.json()
-        setPropertyTypes(propertyTypesData.propertyType)
-        setIsLoadingPropertyTypes(false)
       } catch (error) {
-        console.error("Erreur:", error)
+        console.error('Erreur:', error)
         toast({
           title: "Erreur",
           description: "Impossible de charger les données nécessaires",
@@ -163,7 +183,7 @@ export function AddPropertyForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsSubmitting(true)
-
+      
       const formData = new FormData()
       formData.append("propertyTypeID", values.propertyTypeID)
       formData.append("propertyLocation", values.propertyLocation)
@@ -174,22 +194,15 @@ export function AddPropertyForm() {
       formData.append("bathroom", values.bathroom)
       formData.append("propertyLevel", values.propertyLevel)
       formData.append("accountId", values.accountId)
-
+      
       // Append all property photos
       for (let i = 0; i < values.property_photo.length; i++) {
         formData.append("property_photo", values.property_photo[i])
       }
-
+      
       // Append property document
       formData.append("propertyDoc", values.propertyDoc[0])
-
-      // Log the form data
-      console.log("Form Values:", values)
-      console.log("FormData entries:")
-      for (const pair of formData.entries()) {
-        console.log(pair[0], pair[1])
-      }
-
+  
       const result = await propertyService.addProperty(formData)
 
       if (result.success) {
@@ -197,7 +210,7 @@ export function AddPropertyForm() {
           title: "Succès",
           description: "La propriété a été ajoutée avec succès",
         })
-        router.push("/properties")
+        router.push("/properties/list")
         router.refresh()
       } else {
         throw new Error(result.error)
@@ -232,9 +245,9 @@ export function AddPropertyForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {propertyTypes.map((type) => (
-                          <SelectItem key={type.propertyTypeId} value={type.propertyTypeId.toString()}>
-                            {type.propertyTypeName}
+                        {PROPERTY_TYPES.map((type) => (
+                          <SelectItem key={type.id} value={type.id.toString()}>
+                            {type.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -257,10 +270,15 @@ export function AddPropertyForm() {
                             variant="outline"
                             role="combobox"
                             aria-expanded={openCityCombobox}
-                            className={cn("w-full justify-between", !field.value && "text-muted-foreground")}
+                            className={cn(
+                              "w-full justify-between",
+                              !field.value && "text-muted-foreground"
+                            )}
                           >
                             {field.value
-                              ? cities.find((city) => city.villeId.toString() === field.value)?.villeName
+                              ? cities.find(
+                                  (city) => city.villeId.toString() === field.value
+                                )?.villeName
                               : "Sélectionner une ville"}
                             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
@@ -268,7 +286,10 @@ export function AddPropertyForm() {
                       </PopoverTrigger>
                       <PopoverContent className="w-full p-0">
                         <Command>
-                          <CommandInput placeholder="Rechercher une ville..." className="h-9" />
+                          <CommandInput
+                            placeholder="Rechercher une ville..."
+                            className="h-9"
+                          />
                           <CommandEmpty>Aucune ville trouvée.</CommandEmpty>
                           <CommandGroup className="max-h-64 overflow-auto">
                             {cities.map((city) => (
@@ -284,7 +305,9 @@ export function AddPropertyForm() {
                                 <Check
                                   className={cn(
                                     "ml-auto h-4 w-4",
-                                    city.villeId.toString() === field.value ? "opacity-100" : "opacity-0",
+                                    city.villeId.toString() === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
                                   )}
                                 />
                               </CommandItem>
@@ -409,10 +432,15 @@ export function AddPropertyForm() {
                             variant="outline"
                             role="combobox"
                             aria-expanded={openAccountCombobox}
-                            className={cn("w-full justify-between", !field.value && "text-muted-foreground")}
+                            className={cn(
+                              "w-full justify-between",
+                              !field.value && "text-muted-foreground"
+                            )}
                           >
                             {field.value
-                              ? accounts.find((account) => account.accountId.toString() === field.value)?.accounTitle
+                              ? accounts.find(
+                                  (account) => account.accountId.toString() === field.value
+                                )?.accounTitle
                               : "Sélectionner un compte"}
                             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
@@ -420,7 +448,10 @@ export function AddPropertyForm() {
                       </PopoverTrigger>
                       <PopoverContent className="w-full p-0">
                         <Command>
-                          <CommandInput placeholder="Rechercher un compte..." className="h-9" />
+                          <CommandInput
+                            placeholder="Rechercher un compte..."
+                            className="h-9"
+                          />
                           <CommandEmpty>Aucun compte trouvé.</CommandEmpty>
                           <CommandGroup className="max-h-64 overflow-auto">
                             {accounts.map((account) => (
@@ -443,7 +474,9 @@ export function AddPropertyForm() {
                                 <Check
                                   className={cn(
                                     "ml-auto h-4 w-4",
-                                    account.accountId.toString() === field.value ? "opacity-100" : "opacity-0",
+                                    account.accountId.toString() === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
                                   )}
                                 />
                               </CommandItem>
@@ -472,7 +505,9 @@ export function AddPropertyForm() {
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>Formats acceptés : JPG, PNG, WebP. Taille max : 5MB</FormDescription>
+                    <FormDescription>
+                      Formats acceptés : JPG, PNG, WebP. Taille max : 5MB
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -492,7 +527,9 @@ export function AddPropertyForm() {
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>Format accepté : PDF. Taille max : 5MB</FormDescription>
+                    <FormDescription>
+                      Format accepté : PDF. Taille max : 5MB
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -500,12 +537,17 @@ export function AddPropertyForm() {
             </div>
 
             <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+                disabled={isSubmitting}
+              >
                 Annuler
               </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSubmitting ? "Ajout en cours..." : "Ajouter la propriété"}
+                {isSubmitting ? 'Ajout en cours...' : 'Ajouter la propriété'}
               </Button>
             </div>
           </form>
