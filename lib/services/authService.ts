@@ -10,8 +10,8 @@ export const authService = {
     // Stocke le token dans un cookie
     Cookies.set(AUTH_COOKIE_NAME, data.userToken, { 
       expires: oneHourFromNow, // expire après 7 jours
-      secure: process.env.NODE_ENV === 'production', // utilise HTTPS en production
-      sameSite: 'strict'
+    //  secure: process.env.NODE_ENV === 'production', // utilise HTTPS en production
+     // sameSite: 'strict'
     });
 
     // Stocke les données utilisateur dans un cookie séparé
@@ -24,7 +24,7 @@ export const authService = {
     Cookies.set(USER_DATA_COOKIE_NAME, JSON.stringify(userData), {
       expires: oneHourFromNow,
    //   secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
+     // sameSite: 'strict'
     });
   },
 
