@@ -1,6 +1,6 @@
 "use client"
 
-import { Building2, ChevronDown, LayoutDashboard, Users } from "lucide-react"
+import { Building2, ChevronDown, LayoutDashboard, Users, Megaphone  } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -49,6 +49,16 @@ const navItems: NavItem[] = [
         title: "Ajouter une propriété",
         href: "/properties/add",
       },
+    ],
+  },
+  {
+    title: "Annonces",
+    icon: Megaphone,
+    submenu: [
+      {
+        title: "Liste des annonces",
+        href: "/announcements/list",
+      }
     ],
   },
 ]

@@ -6,8 +6,6 @@ import { ROUTES } from '@/lib/constants/routes';
 export function middleware(request: NextRequest) {
   const authToken = request.cookies.get('micha_auth_token')?.value;
   const isAuthPage = request.nextUrl.pathname === ROUTES.AUTH;
-
-  console.log(authToken);
   
   if (!authToken && !isAuthPage) {
     return NextResponse.redirect(new URL(ROUTES.AUTH, request.url));

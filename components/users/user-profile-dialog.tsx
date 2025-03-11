@@ -208,7 +208,7 @@ export function UserProfileDialog({ user, open, onOpenChange, onSuccess }: UserP
                   <div>
                     <h4 className="text-sm font-medium text-gray-500 mb-2">Carte d'identité (Recto)</h4>
                     <img
-                      src={user.userIdCardFront || "/placeholder.svg"}
+                     src={`http://dev-mani.tech:8000/static/account/user_idCard/${user.userIdCardFront}`}
                       alt="Carte d'identité recto"
                       className="w-full rounded-lg border"
                     />
@@ -218,7 +218,7 @@ export function UserProfileDialog({ user, open, onOpenChange, onSuccess }: UserP
                   <div>
                     <h4 className="text-sm font-medium text-gray-500 mb-2">Carte d'identité (Verso)</h4>
                     <img
-                      src={user.userIdCardBack || "/placeholder.svg"}
+                     src={`http://dev-mani.tech:8000/static/account/user_idCard/${user.userIdCardBack}`}
                       alt="Carte d'identité verso"
                       className="w-full rounded-lg border"
                     />

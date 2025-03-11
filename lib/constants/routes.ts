@@ -23,6 +23,7 @@ export const API_ROUTES = {
   GET_ALL_LEVELS: `${API_BASE_URL}/api/property/getall-level`,
   GET_ALL_PROPERTY_TYPES: `${API_BASE_URL}/api/property/getall-property-type`,
   VALIDATE_PROPERTY: `${API_BASE_URL}/api/property/validate`,
+  GET_ANNOUNCEMENT: `${API_BASE_URL}/api/announcement/getall-announcement`,
   DELETE_PROPERTY: (propertyId: number) => `${API_BASE_URL}/api/property/delete-property/${propertyId}`,
 } as const
 
