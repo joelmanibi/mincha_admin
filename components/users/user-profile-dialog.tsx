@@ -136,7 +136,8 @@ export function UserProfileDialog({ user, open, onOpenChange, onSuccess }: UserP
                 <div className="h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center">
                   {user.userProfilePhoto ? (
                     <img
-                      src={user.userProfilePhoto || "/placeholder.svg"}
+                      
+                       src={`http://dev-mani.tech:8000/static/account/profile_file/${user.userProfilePhoto}`}
                       alt={`${user.userFirstname} ${user.userLastname}`}
                       className="h-full w-full rounded-full object-cover"
                     />
